@@ -1,4 +1,4 @@
-name: Node CI
+name: Test-build
 
 on: [push]
 
@@ -20,8 +20,12 @@ jobs:
     - name: npm install, build, and test
       run: |
         npm ci
-        npm run build --if-present
         npm run lint
-        npm test
+        npm run test
+        npm run build --if-present
+    - name: Automated releases for npm packages.
+      uses: mikeal/merge-release@v4.0.7
       env:
         CI: true
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
