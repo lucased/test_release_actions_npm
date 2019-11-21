@@ -2,7 +2,7 @@ name: Test-build
 
 on:
   pull_request:
-    types: [assigned, opened, synchronize, reopened, closed]
+    types: [assigned, opened, synchronize, reopened]
 
 jobs:
   build:
@@ -25,10 +25,6 @@ jobs:
         npm run lint
         npm run test
         npm run build --if-present
-    - name: Publish
-      uses: mikeal/merge-release@master
-      if: ${{ github.event_name == 'closed'}}
       env:
         CI: true
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
