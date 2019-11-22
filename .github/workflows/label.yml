@@ -16,4 +16,3 @@ jobs:
         APPROVALS: "1"
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ADD_LABEL: "automerge"
-        REMOVE_LABEL: "awaiting%20review"
