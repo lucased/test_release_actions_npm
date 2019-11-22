@@ -54,11 +54,13 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: Update package.json version
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: | 
           git config --global user.name 'lucased'
           git config --global user.email 'lucased@users.noreply.github.com'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git checkout master
           npm version patch
-          git push
+          git push origin master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
