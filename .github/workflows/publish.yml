@@ -1,0 +1,56 @@
+name: Publish
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x, 13.x]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: npm install, build, and test
+      run: |
+        npm i
+        npm run lint
+        npm run test
+        npm run build --if-present
+
+  publish:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Publish
+        uses: mikeal/merge-release@master
+      - name: Update package.json version
+        if: github.event_name == 'pull_request'
+        run: | 
+          npm version patch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+  automerge:
+    needs: [publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: automerge
+        uses: "pascalgn/automerge-action@2c8e667a3386187418587517e5bfe33470d19b5b"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
