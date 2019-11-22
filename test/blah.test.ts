@@ -1,4 +1,4 @@
-import { sum, times } from '../src';
+import { sum, times, divide } from '../src';
 
 describe('tests', () => {
   it('sum', () => {
@@ -6,5 +6,8 @@ describe('tests', () => {
   });
   it('times', () => {
     expect(times(2, 3)).toEqual(6);
+  });
+  it('divide', () => {
+    expect(divide(10, 2)).toEqual(5);
   });
 });
