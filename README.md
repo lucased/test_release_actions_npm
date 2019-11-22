@@ -1,4 +1,4 @@
-https://github.com/lucased/test_release_actions_npm/workflows/ci/badge.svg
+<img src="https://github.com/lucased/test_release_actions_npm/workflows/ci/badge.svg"/>
 
 # TSDX Bootstrap
 
