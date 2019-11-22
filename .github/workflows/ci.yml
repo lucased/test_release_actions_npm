@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - master
-  pull_request_review:
-    types:
-      - submitted
   label:
     types:
       - created
@@ -31,19 +28,6 @@ jobs:
         npm run lint
         npm run test
         npm run build --if-present
-  
-  labelWhenApproved:
-    name: Label when approved
-    runs-on: ubuntu-latest
-    steps:
-    - name: Label when approved
-      if: github.event_name == 'pull_request_review'
-      uses: pullreminders/label-when-approved-action@master
-      env:
-        APPROVALS: "1"
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ADD_LABEL: "automerge"
-        REMOVE_LABEL: "awaiting%20review"
 
   publish:
     needs: [build]
@@ -71,25 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: automerge
+        if: github.event_name == 'label'
         uses: "pascalgn/automerge-action@2c8e667a3386187418587517e5bfe33470d19b5b"
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-
-  # update-version:
-  #   needs: [publish]
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v1
-  #       with:
-  #         ref: ${{ github.head_ref }}
-  #     - name: Update package.json version
-  #       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-  #       run: | 
-  #         git config --global user.name 'lucased'
-  #         git config --global user.email 'lucased@users.noreply.github.com'
-  #         git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-  #         git checkout master
-  #         npm version patch
-  #         git push origin master
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
