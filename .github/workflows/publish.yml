@@ -57,6 +57,8 @@ jobs:
           node-version: '12.x'
       - name: Update package.json version
         run: | 
+          git config user.name "lucased"
+          git config user.email "lucased@users.noreply.github.com"
           npm version patch
 
   automerge:
