@@ -1,3 +1,5 @@
+https://github.com/lucased/test_release_actions_npm/workflows/ci/badge.svg
+
 # TSDX Bootstrap
 
 This project was bootstrapped with [TSDX](https://github.com/jaredpalmer/tsdx).
