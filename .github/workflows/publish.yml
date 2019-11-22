@@ -26,11 +26,35 @@ jobs:
         npm run test
         npm run build --if-present
 
-  publish:
+  labelWhenApproved:
     needs: [build]
+    name: Label when approved
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+    - name: Label when approved
+      uses: pullreminders/label-when-approved-action@master
+      env:
+        APPROVALS: "1"
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ADD_LABEL: "complete"
+
+  automerge:
+    needs: [labelWhenApproved]
+    runs-on: ubuntu-latest
+    steps:
+      - name: automerge
+        uses: "pascalgn/automerge-action@2c8e667a3386187418587517e5bfe33470d19b5b"
+        env:
+          MERGE_LABELS: "complete"
+          MERGE_RETRIES: "6"
+          MERGE_RETRY_SLEEP: "10000"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  publish:
+    needs: [automerge]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -54,26 +78,4 @@ jobs:
           git config user.email "lucased@users.noreply.github.com"
           npm version patch
 
-  labelWhenApproved:
-    needs: [version]
-    name: Label when approved
-    runs-on: ubuntu-latest
-    steps:
-    - name: Label when approved
-      uses: pullreminders/label-when-approved-action@master
-      env:
-        APPROVALS: "1"
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        ADD_LABEL: "complete"
 
-  automerge:
-    needs: [labelWhenApproved]
-    runs-on: ubuntu-latest
-    steps:
-      - name: automerge
-        uses: "pascalgn/automerge-action@2c8e667a3386187418587517e5bfe33470d19b5b"
-        env:
-          MERGE_LABELS: "complete"
-          MERGE_RETRIES: "6"
-          MERGE_RETRY_SLEEP: "10000"
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
