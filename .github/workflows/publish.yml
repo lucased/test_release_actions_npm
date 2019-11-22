@@ -1,9 +1,9 @@
 name: Publish
 
 on:
-  pull_request:
+  pull_request_review:
     types:
-      - labeled
+      - submitted
 
 jobs:
   build:
@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x, 13.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -26,13 +26,35 @@ jobs:
         npm run test
         npm run build --if-present
 
-  publish:
+  labelWhenApproved:
     needs: [build]
+    name: Label when approved
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
+    - name: Label when approved
+      uses: pullreminders/label-when-approved-action@master
+      env:
+        APPROVALS: "1"
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ADD_LABEL: "complete"
+
+  automerge:
+    needs: [labelWhenApproved]
+    runs-on: ubuntu-latest
+    steps:
+      - name: automerge
+        uses: "pascalgn/automerge-action@2c8e667a3386187418587517e5bfe33470d19b5b"
+        env:
+          MERGE_LABELS: "complete"
+          MERGE_RETRIES: "6"
+          MERGE_RETRY_SLEEP: "10000"
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  publish:
+    needs: [automerge]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -47,8 +69,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
@@ -58,11 +78,4 @@ jobs:
           git config user.email "lucased@users.noreply.github.com"
           npm version patch
 
-  automerge:
-    needs: [publish]
-    runs-on: ubuntu-latest
-    steps:
-      - name: automerge
-        uses: "pascalgn/automerge-action@2c8e667a3386187418587517e5bfe33470d19b5b"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
